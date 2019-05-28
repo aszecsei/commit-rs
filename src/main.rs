@@ -170,7 +170,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut cmd = Command::new("git");
     cmd.arg("commit")
-        .arg(format!("-m \"{}\"", msg))
+        .arg("-m")
+        .arg(msg)
         .args(&args[1..]);
 
     cmd.spawn()
