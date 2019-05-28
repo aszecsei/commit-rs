@@ -160,7 +160,7 @@ impl Theme for CustomTheme {
     }
 }
 
-#[derive(EnumString, Display)]
+#[derive(Copy, Clone, EnumString, Display, PartialEq)]
 enum CommitType {
     #[strum(serialize = "test")]
     Test,
@@ -262,8 +262,8 @@ fn main() {
         .interact_opt()
         .unwrap();
     let s = selection.unwrap();
-    let selected_type = &options[s];
-    let selected_type_attrs = get_attrs(selected_type);
+    let selected_type = *(&options[s]);
+    let selected_type_attrs = get_attrs(&selected_type);
 
     let scope = Input::<String>::with_theme(&theme)
         .with_prompt("What is the scope of this change (e.g. component or file name)? (press enter to skip) ")
@@ -289,7 +289,7 @@ fn main() {
         .allow_empty(true)
         .interact()
         .unwrap();
-
+    
     // Generate commit message
     let msg_header = format!(
         "{}{}: {} {}",
@@ -331,7 +331,10 @@ fn main() {
     let msg_body_wrapped = fill(&msg_body, 100);
     let msg_footer_wrapped = fill(&msg_footer, 100);
 
-    let msg = format!("{}{}{}", msg_header_capped, msg_body_wrapped, msg_footer_wrapped);
+    let msg = format!(
+        "{}{}{}",
+        msg_header_capped, msg_body_wrapped, msg_footer_wrapped
+    );
 
     let args: Vec<String> = env::args().collect();
     let mut cmd = Command::new("git");
