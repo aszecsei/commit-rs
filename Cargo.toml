@@ -5,7 +5,7 @@ authors = ["Alic Szecsei <aszecsei@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-git2 = "0.8"
+console = "0.7"
 semver = "0.9"
 serde = {version = "1.0", features = ["derive"]}
 strum = "0.15"
