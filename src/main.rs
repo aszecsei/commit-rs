@@ -1,5 +1,5 @@
 use std::env;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 use console::Style;
 use dialoguer::theme::{SelectionStyle, Theme};
@@ -289,7 +289,7 @@ fn main() {
         .allow_empty(true)
         .interact()
         .unwrap();
-    
+
     // Generate commit message
     let msg_header = format!(
         "{}{}: {} {}",
@@ -340,5 +340,5 @@ fn main() {
     let mut cmd = Command::new("git");
     cmd.arg("commit").arg("-m").arg(msg).args(&args[1..]);
 
-    cmd.spawn().expect("failed to run git commit");
+    cmd.stdout(Stdio::null()).spawn().expect("failed to run git commit");
 }
