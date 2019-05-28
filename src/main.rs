@@ -7,6 +7,8 @@ use dialoguer::{Input, Select};
 use std::fmt;
 use strum_macros::{Display, EnumString};
 
+use textwrap::fill;
+
 /// A custom theme, built from ColorfulTheme
 pub struct CustomTheme {
     /// The style for default values in prompts and similar
@@ -325,7 +327,11 @@ fn main() {
         "".to_owned()
     };
 
-    let msg = format!("{}{}{}", msg_header, msg_body, msg_footer);
+    let msg_header_capped: String = msg_header.chars().take(100).collect();
+    let msg_body_wrapped = fill(&msg_body, 100);
+    let msg_footer_wrapped = fill(&msg_footer, 100);
+
+    let msg = format!("{}{}{}", msg_header_capped, msg_body_wrapped, msg_footer_wrapped);
 
     let args: Vec<String> = env::args().collect();
     let mut cmd = Command::new("git");
