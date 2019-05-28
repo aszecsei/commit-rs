@@ -107,7 +107,9 @@ fn main() {
     ];
     let m_opts: Vec<String> = options.iter().map(|e| format!("{}: {}", e, get_attrs(e).description)).collect();
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let theme = ColorfulTheme::default();
+
+    let selection = Select::with_theme(&theme)
         .with_prompt("Select the type of change that you're committing")
         .default(0)
         .items(&m_opts[..])
@@ -117,23 +119,23 @@ fn main() {
     let selected_type = &options[s];
     let selected_type_attrs = get_attrs(selected_type);
 
-    let scope = Input::<String>::new()
+    let scope = Input::<String>::with_theme(&theme)
         .with_prompt("What is the scope of this change (e.g. component or file name)? (press enter to skip)")
         .allow_empty(true)
         .interact().unwrap();
-    let subject = Input::<String>::new()
+    let subject = Input::<String>::with_theme(&theme)
         .with_prompt("Write a short, imperative tense description of the change:\n")
         .interact().unwrap();
-    let body = Input::<String>::new()
+    let body = Input::<String>::with_theme(&theme)
         .with_prompt("Provide a longer description of the change: (press enter to skip)\n")
         .allow_empty(true)
         .interact().unwrap();
 
-    let breaking = Input::<String>::new()
+    let breaking = Input::<String>::with_theme(&theme)
         .with_prompt("Describe any breaking changes: (press enter to skip)")
         .allow_empty(true)
         .interact().unwrap();
-    let issues = Input::<String>::new()
+    let issues = Input::<String>::with_theme(&theme)
         .with_prompt("Related issues: (press enter to skip)")
         .allow_empty(true)
         .interact().unwrap();
