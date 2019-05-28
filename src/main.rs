@@ -1,11 +1,11 @@
-use std::process::Command;
 use std::env;
+use std::process::Command;
 
-use dialoguer::{Select, Input};
-use strum_macros::{Display, EnumString};
-use dialoguer::theme::{Theme, SelectionStyle};
 use console::Style;
+use dialoguer::theme::{SelectionStyle, Theme};
+use dialoguer::{Input, Select};
 use std::fmt;
+use strum_macros::{Display, EnumString};
 
 /// A custom theme, built from ColorfulTheme
 pub struct CustomTheme {
@@ -54,12 +54,7 @@ impl Theme for CustomTheme {
         default: Option<&str>,
     ) -> fmt::Result {
         match default {
-            Some(default) => write!(
-                f,
-                "{} [{}]",
-                prompt,
-                self.defaults_style.apply_to(default)
-            ),
+            Some(default) => write!(f, "{} [{}]", prompt, self.defaults_style.apply_to(default)),
             None => write!(f, "{}", prompt),
         }
     }
@@ -165,25 +160,25 @@ impl Theme for CustomTheme {
 
 #[derive(EnumString, Display)]
 enum CommitType {
-    #[strum(serialize="test")]
+    #[strum(serialize = "test")]
     Test,
-    #[strum(serialize="feat")]
+    #[strum(serialize = "feat")]
     Feature,
-    #[strum(serialize="fix")]
+    #[strum(serialize = "fix")]
     Fix,
-    #[strum(serialize="chore")]
+    #[strum(serialize = "chore")]
     Chore,
-    #[strum(serialize="docs")]
+    #[strum(serialize = "docs")]
     Docs,
-    #[strum(serialize="refactor")]
+    #[strum(serialize = "refactor")]
     Refactor,
-    #[strum(serialize="release")]
+    #[strum(serialize = "release")]
     Release,
-    #[strum(serialize="style")]
+    #[strum(serialize = "style")]
     Style,
-    #[strum(serialize="ci")]
+    #[strum(serialize = "ci")]
     CI,
-    #[strum(serialize="perf")]
+    #[strum(serialize = "perf")]
     Perf,
 }
 
@@ -238,7 +233,6 @@ fn get_attrs(ty: &CommitType) -> CommitTypeDetails {
 }
 
 fn main() {
-
     println!("\nAll commit message lines will be cropped at 100 characters.\n");
 
     // TODO: Change this to EnumIter
@@ -252,7 +246,10 @@ fn main() {
         CommitType::Test,
         CommitType::Chore,
     ];
-    let m_opts: Vec<String> = options.iter().map(|e| format!("{}: {}", e, get_attrs(e).description)).collect();
+    let m_opts: Vec<String> = options
+        .iter()
+        .map(|e| format!("{}: {}", e, get_attrs(e).description))
+        .collect();
 
     let theme = CustomTheme::default();
 
@@ -272,33 +269,47 @@ fn main() {
         .interact().unwrap();
     let subject = Input::<String>::with_theme(&theme)
         .with_prompt("Write a short, imperative tense description of the change:\n")
-        .interact().unwrap();
+        .interact()
+        .unwrap();
     let body = Input::<String>::with_theme(&theme)
         .with_prompt("Provide a longer description of the change: (press enter to skip)\n")
         .allow_empty(true)
-        .interact().unwrap();
+        .interact()
+        .unwrap();
 
     let breaking = Input::<String>::with_theme(&theme)
         .with_prompt("Describe any breaking changes: (press enter to skip) ")
         .allow_empty(true)
-        .interact().unwrap();
+        .interact()
+        .unwrap();
     let issues = Input::<String>::with_theme(&theme)
         .with_prompt("Related issues: (press enter to skip) ")
         .allow_empty(true)
-        .interact().unwrap();
+        .interact()
+        .unwrap();
 
     // Generate commit message
-    let msg_header = format!("{}{}: {} {}",
+    let msg_header = format!(
+        "{}{}: {} {}",
         selected_type,
-        if scope.len() > 0 { format!("({})", scope) } else { "".to_owned() },
+        if scope.len() > 0 {
+            format!("({})", scope)
+        } else {
+            "".to_owned()
+        },
         selected_type_attrs.emoji,
         subject
     );
 
-    let msg_body = if body.len() > 0 { format!("\n\n{}", body) } else { "".to_owned() };
+    let msg_body = if body.len() > 0 {
+        format!("\n\n{}", body)
+    } else {
+        "".to_owned()
+    };
 
     let msg_footer = if breaking.len() > 0 || issues.len() > 0 {
-        format!("\n{}{}",
+        format!(
+            "\n{}{}",
             if breaking.len() > 0 {
                 format!("\nBREAKING CHANGE: {}", breaking)
             } else {
@@ -318,11 +329,7 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
     let mut cmd = Command::new("git");
-    cmd.arg("commit")
-        .arg("-m")
-        .arg(msg)
-        .args(&args[1..]);
+    cmd.arg("commit").arg("-m").arg(msg).args(&args[1..]);
 
-    cmd.spawn()
-        .expect("failed to run git commit");
+    cmd.spawn().expect("failed to run git commit");
 }
