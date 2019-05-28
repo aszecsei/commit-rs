@@ -4,6 +4,18 @@ version = "1.0.0"
 authors = ["Alic Szecsei <aszecsei@gmail.com>"]
 edition = "2018"
 
+description = "A rust program to enable automated git commits according to conventional commits"
+repository = "https://github.com/aszecsei/commit-rs"
+readme = "README.md"
+keywords = ["conventional commits"]
+categories = ["command-line-utilities", "development-tools"]
+license = "MIT"
+
+[badges]
+is-it-maintained-issue-resolution = { repository = "aszecsei/commit-rs" }
+is-it-maintained-open-issues = { repository = "aszecsei/commit-rs" }
+maintenance = { status = "actively-developed" }
+
 [dependencies]
 console = "0.7"
 dialoguer = "0.4"
