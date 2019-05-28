@@ -1,6 +1,6 @@
 [package]
 name = "cargo-commit"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Alic Szecsei <aszecsei@gmail.com>"]
 edition = "2018"
 
