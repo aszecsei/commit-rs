@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::env;
 use std::process::{Command, Stdio};
 
@@ -45,13 +47,13 @@ impl Default for CustomTheme {
 }
 
 impl Theme for CustomTheme {
-    fn format_prompt(&self, f: &mut fmt::Write, prompt: &str) -> fmt::Result {
+    fn format_prompt(&self, f: &mut dyn fmt::Write, prompt: &str) -> fmt::Result {
         write!(f, "{}:", prompt)
     }
 
     fn format_singleline_prompt(
         &self,
-        f: &mut fmt::Write,
+        f: &mut dyn fmt::Write,
         prompt: &str,
         default: Option<&str>,
     ) -> fmt::Result {
@@ -61,13 +63,13 @@ impl Theme for CustomTheme {
         }
     }
 
-    fn format_error(&self, f: &mut fmt::Write, err: &str) -> fmt::Result {
+    fn format_error(&self, f: &mut dyn fmt::Write, err: &str) -> fmt::Result {
         write!(f, "{}: {}", self.error_style.apply_to("error"), err)
     }
 
     fn format_confirmation_prompt(
         &self,
-        f: &mut fmt::Write,
+        f: &mut dyn fmt::Write,
         prompt: &str,
         default: Option<bool>,
     ) -> fmt::Result {
@@ -82,7 +84,7 @@ impl Theme for CustomTheme {
 
     fn format_confirmation_prompt_selection(
         &self,
-        f: &mut fmt::Write,
+        f: &mut dyn fmt::Write,
         prompt: &str,
         selection: bool,
     ) -> fmt::Result {
@@ -100,7 +102,7 @@ impl Theme for CustomTheme {
 
     fn format_single_prompt_selection(
         &self,
-        f: &mut fmt::Write,
+        f: &mut dyn fmt::Write,
         prompt: &str,
         sel: &str,
     ) -> fmt::Result {
@@ -109,7 +111,7 @@ impl Theme for CustomTheme {
 
     fn format_multi_prompt_selection(
         &self,
-        f: &mut fmt::Write,
+        f: &mut dyn fmt::Write,
         prompt: &str,
         selections: &[&str],
     ) -> fmt::Result {
@@ -125,7 +127,12 @@ impl Theme for CustomTheme {
         Ok(())
     }
 
-    fn format_selection(&self, f: &mut fmt::Write, text: &str, st: SelectionStyle) -> fmt::Result {
+    fn format_selection(
+        &self,
+        f: &mut dyn fmt::Write,
+        text: &str,
+        st: SelectionStyle,
+    ) -> fmt::Result {
         match st {
             SelectionStyle::CheckboxUncheckedSelected => write!(
                 f,
@@ -340,5 +347,7 @@ fn main() {
     let mut cmd = Command::new("git");
     cmd.arg("commit").arg("-m").arg(msg).args(&args[1..]);
 
-    cmd.stdout(Stdio::null()).spawn().expect("failed to run git commit");
+    cmd.stdout(Stdio::null())
+        .spawn()
+        .expect("failed to run git commit");
 }
