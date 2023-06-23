@@ -3,169 +3,11 @@
 use std::env;
 use std::process::{Command, Stdio};
 
-use console::Style;
-use dialoguer::theme::{SelectionStyle, Theme};
+use dialoguer::theme::ColorfulTheme;
 use dialoguer::{Input, Select};
-use std::fmt;
 use strum_macros::{Display, EnumString};
 
 use textwrap::fill;
-
-/// A custom theme, built from `ColorfulTheme`
-pub struct CustomTheme {
-    /// The style for default values in prompts and similar
-    pub defaults_style: Style,
-    /// The style for errors indicators
-    pub error_style: Style,
-    /// The style for user interface indicators
-    pub indicator_style: Style,
-    /// The style for inactive elements
-    pub inactive_style: Style,
-    /// The style for active elements
-    pub active_style: Style,
-    /// The style for values indicating "yes"
-    pub yes_style: Style,
-    /// The style for values indicating "no"
-    pub no_style: Style,
-    /// The style for values embedded in prompts
-    pub values_style: Style,
-}
-
-impl Default for CustomTheme {
-    fn default() -> CustomTheme {
-        CustomTheme {
-            defaults_style: Style::new().dim(),
-            error_style: Style::new().red(),
-            indicator_style: Style::new().cyan().bold(),
-            inactive_style: Style::new().dim(),
-            active_style: Style::new(),
-            yes_style: Style::new().green(),
-            no_style: Style::new().green(),
-            values_style: Style::new().cyan(),
-        }
-    }
-}
-
-impl Theme for CustomTheme {
-    fn format_prompt(&self, f: &mut dyn fmt::Write, prompt: &str) -> fmt::Result {
-        write!(f, "{prompt}:")
-    }
-
-    fn format_singleline_prompt(
-        &self,
-        f: &mut dyn fmt::Write,
-        prompt: &str,
-        default: Option<&str>,
-    ) -> fmt::Result {
-        match default {
-            Some(default) => write!(f, "{} [{}]", prompt, self.defaults_style.apply_to(default)),
-            None => write!(f, "{prompt}"),
-        }
-    }
-
-    fn format_error(&self, f: &mut dyn fmt::Write, err: &str) -> fmt::Result {
-        write!(f, "{}: {}", self.error_style.apply_to("error"), err)
-    }
-
-    fn format_confirmation_prompt(
-        &self,
-        f: &mut dyn fmt::Write,
-        prompt: &str,
-        default: Option<bool>,
-    ) -> fmt::Result {
-        write!(f, "{}", &prompt)?;
-        match default {
-            None => {}
-            Some(true) => write!(f, " {} ", self.defaults_style.apply_to("[Y/n]"))?,
-            Some(false) => write!(f, " {} ", self.defaults_style.apply_to("[y/N]"))?,
-        }
-        Ok(())
-    }
-
-    fn format_confirmation_prompt_selection(
-        &self,
-        f: &mut dyn fmt::Write,
-        prompt: &str,
-        selection: bool,
-    ) -> fmt::Result {
-        write!(
-            f,
-            "{} {}",
-            &prompt,
-            if selection {
-                self.yes_style.apply_to("yes")
-            } else {
-                self.no_style.apply_to("no")
-            }
-        )
-    }
-
-    fn format_single_prompt_selection(
-        &self,
-        f: &mut dyn fmt::Write,
-        prompt: &str,
-        sel: &str,
-    ) -> fmt::Result {
-        write!(f, "{}{}", prompt, self.values_style.apply_to(sel))
-    }
-
-    fn format_multi_prompt_selection(
-        &self,
-        f: &mut dyn fmt::Write,
-        prompt: &str,
-        selections: &[&str],
-    ) -> fmt::Result {
-        write!(f, "{prompt}: ")?;
-        for (idx, sel) in selections.iter().enumerate() {
-            write!(
-                f,
-                "{}{}",
-                if idx == 0 { "" } else { ", " },
-                self.values_style.apply_to(sel)
-            )?;
-        }
-        Ok(())
-    }
-
-    fn format_selection(
-        &self,
-        f: &mut dyn fmt::Write,
-        text: &str,
-        st: SelectionStyle,
-    ) -> fmt::Result {
-        match st {
-            SelectionStyle::CheckboxUncheckedSelected => write!(
-                f,
-                "{} [ ] {}",
-                self.indicator_style.apply_to(">"),
-                self.active_style.apply_to(text)
-            ),
-            SelectionStyle::CheckboxUncheckedUnselected => {
-                write!(f, "  [ ] {}", self.inactive_style.apply_to(text))
-            }
-            SelectionStyle::CheckboxCheckedSelected => write!(
-                f,
-                "{} [{}] {}",
-                self.indicator_style.apply_to(">"),
-                self.indicator_style.apply_to("x"),
-                self.active_style.apply_to(text),
-            ),
-            SelectionStyle::CheckboxCheckedUnselected => write!(
-                f,
-                "  [{}] {}",
-                self.indicator_style.apply_to("x"),
-                self.inactive_style.apply_to(text)
-            ),
-            SelectionStyle::MenuSelected => write!(
-                f,
-                "{} {}",
-                self.indicator_style.apply_to(">"),
-                self.active_style.apply_to(text)
-            ),
-            SelectionStyle::MenuUnselected => write!(f, "  {}", self.inactive_style.apply_to(text)),
-        }
-    }
-}
 
 #[derive(Copy, Clone, EnumString, Display, PartialEq)]
 enum CommitType {
@@ -260,7 +102,7 @@ fn main() {
         .map(|&e| format!("{}: {}", e, get_attrs(e).description))
         .collect();
 
-    let theme = CustomTheme::default();
+    let theme = ColorfulTheme::default();
 
     let selection = Select::with_theme(&theme)
         .with_prompt("Select the type of change that you're committing")
