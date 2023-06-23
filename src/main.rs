@@ -11,7 +11,7 @@ use strum_macros::{Display, EnumString};
 
 use textwrap::fill;
 
-/// A custom theme, built from ColorfulTheme
+/// A custom theme, built from `ColorfulTheme`
 pub struct CustomTheme {
     /// The style for default values in prompts and similar
     pub defaults_style: Style,
@@ -48,7 +48,7 @@ impl Default for CustomTheme {
 
 impl Theme for CustomTheme {
     fn format_prompt(&self, f: &mut dyn fmt::Write, prompt: &str) -> fmt::Result {
-        write!(f, "{}:", prompt)
+        write!(f, "{prompt}:")
     }
 
     fn format_singleline_prompt(
@@ -59,7 +59,7 @@ impl Theme for CustomTheme {
     ) -> fmt::Result {
         match default {
             Some(default) => write!(f, "{} [{}]", prompt, self.defaults_style.apply_to(default)),
-            None => write!(f, "{}", prompt),
+            None => write!(f, "{prompt}"),
         }
     }
 
@@ -115,7 +115,7 @@ impl Theme for CustomTheme {
         prompt: &str,
         selections: &[&str],
     ) -> fmt::Result {
-        write!(f, "{}: ", prompt)?;
+        write!(f, "{prompt}: ")?;
         for (idx, sel) in selections.iter().enumerate() {
             write!(
                 f,
@@ -196,7 +196,7 @@ struct CommitTypeDetails {
     emoji: String,
 }
 
-fn get_attrs(ty: &CommitType) -> CommitTypeDetails {
+fn get_attrs(ty: CommitType) -> CommitTypeDetails {
     match ty {
         CommitType::Chore => CommitTypeDetails {
             description: "Build process or auxiliary tool changes".to_owned(),
@@ -257,7 +257,7 @@ fn main() {
     ];
     let m_opts: Vec<String> = options
         .iter()
-        .map(|e| format!("{}: {}", e, get_attrs(e).description))
+        .map(|&e| format!("{}: {}", e, get_attrs(e).description))
         .collect();
 
     let theme = CustomTheme::default();
@@ -269,8 +269,8 @@ fn main() {
         .interact_opt()
         .unwrap();
     let s = selection.unwrap();
-    let selected_type = *(&options[s]);
-    let selected_type_attrs = get_attrs(&selected_type);
+    let selected_type = options[s];
+    let selected_type_attrs = get_attrs(selected_type);
 
     let scope = Input::<String>::with_theme(&theme)
         .with_prompt("What is the scope of this change (e.g. component or file name)? (press enter to skip) ")
@@ -301,37 +301,38 @@ fn main() {
     let msg_header = format!(
         "{}{}: {} {}",
         selected_type,
-        if scope.len() > 0 {
-            format!("({})", scope)
+        if scope.is_empty() {
+            String::new()
         } else {
-            "".to_owned()
+            format!("({scope})")
         },
         selected_type_attrs.emoji,
         subject
     );
 
-    let msg_body = if body.len() > 0 {
-        format!("\n\n{}", body)
+    let msg_body = if body.is_empty() {
+        String::new()
     } else {
-        "".to_owned()
+        format!("\n\n{body}")
     };
 
-    let msg_footer = if breaking.len() > 0 || issues.len() > 0 {
+    let msg_footer = if !breaking.is_empty() || !issues.is_empty() {
         format!(
             "\n{}{}",
-            if breaking.len() > 0 {
-                format!("\nBREAKING CHANGE: {}", breaking)
+            if breaking.is_empty() {
+                String::new()
             } else {
-                "".to_owned()
+                format!("\nBREAKING CHANGE: {breaking}")
             },
-            if issues.len() > 0 {
-                format!("\nRelated issues: {}", issues)
+            if issues.is_empty() {
+                String::new()
             } else {
-                "".to_owned()
+                format!("\nRelated issues: {issues}")
+                
             }
         )
     } else {
-        "".to_owned()
+        String::new()
     };
 
     let msg_header_capped: String = msg_header.chars().take(100).collect();
@@ -339,8 +340,7 @@ fn main() {
     let msg_footer_wrapped = fill(&msg_footer, 100);
 
     let msg = format!(
-        "{}{}{}",
-        msg_header_capped, msg_body_wrapped, msg_footer_wrapped
+        "{msg_header_capped}{msg_body_wrapped}{msg_footer_wrapped}"
     );
 
     let args: Vec<String> = env::args().collect();
